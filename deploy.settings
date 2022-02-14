@@ -1,0 +1,6 @@
+version = 0.1.1
+groupId = Mss
+artifactId = MssDbMigration
+licenses = ['Apache 2'] // or something else 
+id = MssDbMigration
+gitUrl = https://github.com/mtschach/MssIntern

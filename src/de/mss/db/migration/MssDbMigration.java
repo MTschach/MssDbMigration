@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.callback.Callback;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 
 import de.mss.configtools.ConfigFile;
 import de.mss.utils.exception.MssException;
@@ -39,8 +40,9 @@ public class MssDbMigration {
 
    private void addDefaultLocations(boolean fromFilesystem) {
       addFileLocation("db/design", fromFilesystem);
-      addFileLocation("db/scsripts", fromFilesystem);
+      addFileLocation("db/scripts", fromFilesystem);
       addFileLocation("db/values", fromFilesystem);
+      addFileLocation("db/trigger", fromFilesystem);
    }
 
 
@@ -132,7 +134,7 @@ public class MssDbMigration {
       getConnection();
 
       try {
-         final var flyway = Flyway
+         final FluentConfiguration flyway = Flyway
                .configure()
                .dataSource(
                      getCfgUrl(),

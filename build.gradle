@@ -8,38 +8,26 @@
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
-apply plugin: 'eclipse'
-
-def artifact = new Properties()
-artifact.load(new FileInputStream("${project.projectDir}${File.separator}deploy.settings"))
-
-version = artifact.version
-
-defaultTasks 'build'
+apply plugin: 'jacoco'
 
 apply from: 'https://raw.githubusercontent.com/MTschach/MssUtils/master/deploy.gradle'
 
 apply from: 'https://raw.githubusercontent.com/MTschach/MssUtils/master/artifactory.gradle'
 
+apply from: 'https://raw.githubusercontent.com/MTschach/MssUtils/master/eclipse.gradle'
+
+def artifact = new Properties()
+artifact.load(new FileInputStream("${project.projectDir}${File.separator}deploy.settings"))
 
 buildscript {
-    repositories {
-        mavenLocal()
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-        jcenter()
-        google()
-    }
-   dependencies {
-      classpath 'com.android.tools.build:gradle:3.2.1'
-      classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
-      classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:latest.release'
-      classpath 'de.jjohannes.gradle:extra-java-module-info:0.10'
-    }
+   apply from: 'https://raw.githubusercontent.com/MTschach/MssUtils/master/buildscript.gradle'
 }
 
-apply plugin: 'de.jjohannes.extra-java-module-info'
+apply plugin: "name.remal.module-info-generator"
+
+version = artifact.version
+
+defaultTasks 'build'
 
 sourceSets {
    main {
@@ -56,16 +44,37 @@ sourceSets {
 
 
 dependencies {
-   implementation       group: 'Mss'                           , name: 'MssUtils'               , version: 'latest.release'
-   implementation       group: 'Mss'                           , name: 'MssConfigTools'         , version: 'latest.release'
-   implementation       group: 'org.apache.logging.log4j'      , name: 'log4j-core'             , version: 'latest.release'
-   implementation       group: 'org.apache.logging.log4j'      , name: 'log4j-api'              , version: 'latest.release'
-   implementation       group: 'org.flywaydb'                  , name: 'flyway-core'            , version: '8.0.4'
+   implementation       group: 'Mss'                                          , name: 'MssUtils'                        , version: 'latest.release'
+   implementation       group: 'Mss'                                          , name: 'MssConfigTools'                  , version: 'latest.release'
+   implementation       group: 'org.apache.logging.log4j'                     , name: 'log4j-core'                      , version: "${loggingVersion}"
+   implementation       group: 'org.apache.logging.log4j'                     , name: 'log4j-api'                       , version: "${loggingVersion}"
+   implementation       group: 'org.flywaydb'                                 , name: 'flyway-core'                     , version: "${flywayVersion}"
 
 
-   testImplementation   group: 'junit'                         , name: 'junit'                  , version: '4.12'
-   testImplementation   group: 'org.powermock'                 , name: 'powermock-module-junit4', version: 'latest.release'
-   testImplementation   group: 'org.powermock'                 , name: 'powermock-api-easymock' , version: 'latest.release'
-   testImplementation   group: 'mysql'                         , name: 'mysql-connector-java'   , version: '8.0.11'
-   testImplementation   group: 'org.xerial'                    , name: 'sqlite-jdbc'            , version: '3.7.2'
+   testImplementation   group: 'org.junit.jupiter'                            , name: 'junit-jupiter-engine'            , version: "${junitVersion}"
+   testImplementation   group: 'org.powermock'                                , name: 'powermock-module-junit4'         , version: "${powerMockVersion}"
+   testImplementation   group: 'org.powermock'                                , name: 'powermock-api-easymock'          , version: "${powerMockVersion}"
+   testImplementation   group: 'mysql'                                        , name: 'mysql-connector-java'            , version: "${mysqlConnectorVersion}"
+   testImplementation   group: 'org.xerial'                                   , name: 'sqlite-jdbc'                     , version: "${sqliteVersion}"
+}
+
+
+
+jacocoTestReport {
+   dependsOn test
+   reports {
+      xml.required = true
+   }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+tasks.generateModuleInfo {
+   moduleName = 'mss.dbmigration'
+   exports {
+      includes.add('de.mss.db.migration')
+   }
 }
